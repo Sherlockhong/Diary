@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘의 영어 단어</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3e5f5; /* 파스텔 보라색 */
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            color: #6a1b9a; /* 보라색 */
+            margin-bottom: 30px;
+        }
+        .word {
+            font-size: 2em;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .word:hover {
+            color: #d32f2f; /* 레드 */
+        }
+        .checked {
+            text-decoration: line-through;
+        }
+        .checkbox {
+            margin-top: 10px;
+        }
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            display: none;
+            max-width: 300px;
+            width: 100%;
+        }
+        .popup .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+        footer {
+            margin-top: 20px;
+            color: #6a1b9a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>오늘의 영어 단어</h1>
+        <div id="word" class="word">Loading...</div>
+        <div class="checkbox">
+            <input type="checkbox" id="learned">
+            <label for="learned">배웠습니다</label>
+        </div>
+    </div>
+
+    <footer>
+        by SherlockHong
+    </footer>
+
+    <div id="popup" class="popup">
+        <span class="close">&times;</span>
+        <h2 id="popup-word"></h2>
+        <p id="popup-definition"></p>
+        <button id="play-sound" class="btn btn-primary"><i class="fa fa-volume-up"></i> 발음 듣기</button>
+    </div>
+
+    <script>
+        const wordElement = document.getElementById('word');
+        const popup = document.getElementById('popup');
+        const popupWord = document.getElementById('popup-word');
+        const popupDefinition = document.getElementById('popup-definition');
+        const playSoundButton = document.getElementById('play-sound');
+        const learnedCheckbox = document.getElementById('learned');
+
+        // 무작위 단어 리스트
+        const words = ['example', 'future', 'vision', 'strategy', 'knowledge', 'success', 'achievement', 'creativity', 'innovation', 'leadership'];
+
+        // 단어 무작위 선택
+        const randomWord = words[Math.floor(Math.random() * words.length)];
+
+        // 단어 API 호출
+        fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${randomWord}`)
+            .then(response => response.json())
+            .then(data => {
+                const wordData = data[0];
+                wordElement.textContent = wordData.word;
+                popupWord.textContent = wordData.word;
+                popupDefinition.textContent = wordData.meanings[0].definitions[0].definition;
+
+                // 발음 오디오 설정
+                if (wordData.phonetics[0] && wordData.phonetics[0].audio) {
+                    playSoundButton.onclick = () => {
+                        const audio = new Audio(wordData.phonetics[0].audio);
+                        audio.play();
+                    };
+                } else {
+                    playSoundButton.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                wordElement.textContent = "Error loading word.";
+            });
+
+        // 단어 클릭 시 팝업창 표시
+        wordElement.onclick = () => {
+            popup.style.display = 'block';
+        };
+
+        // 팝업창 닫기
+        document.querySelector('.close').onclick = () => {
+            popup.style.display = 'none';
+        };
+
+        // 체크박스에 체크하면 줄 그어지게
+        learnedCheckbox.onchange = () => {
+            if (learnedCheckbox.checked) {
+                wordElement.classList.add('checked');
+            } else {
+                wordElement.classList.remove('checked');
+            }
+        };
+    </script>
+
+</body>
+</html>
